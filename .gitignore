@@ -1,0 +1,4 @@
+.vscode/
+tensor_test/
+venv/
+MNIST_data/
