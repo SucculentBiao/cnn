@@ -1,8 +1,12 @@
 import tensorflow as tf 
 import img_data
 
+sess = tf.Session()
+
 img_inputs = tf.placeholder('float', shape=[None, 784])
 expec_outputs = tf.placeholder('float', shape=[None, 14])
+
+sess.run(tf.global_variables_initializer())
 
 weights_conv1 = tf.Variable(tf.truncated_normal([5, 5, 1, 32], stddev=0.1))
 biases_conv1 = tf.Variable(tf.constant(0.1, shape=[32]))
@@ -38,16 +42,17 @@ train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 correct_pre = tf.equal(tf.argmax(outputs, 1), tf.argmax(expec_outputs, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pre, 'float'))
 
-sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 data = img_data.Data()
 
 for i in range(1000):
     batch = data.train_set(50)
-    test = data.test_set(200)
-    train_step.run(feed_dict={img_inputs: batch[0], 
-                    expec_outputs: batch[1], keep_prob: 0.5}, session=sess)
+    test = data.test_set(500)
+    
     train_acc = accuracy.eval(feed_dict={img_inputs: test[0], 
                     expec_outputs: test[1], keep_prob: 1.0}, session=sess)
-    print("train time: %d, accuracy: %f" % (i, train_acc))
+    print("train time: %d, accuracy: %g%%" % (i, train_acc*100))
+
+    train_step.run(feed_dict={img_inputs: batch[0], 
+                    expec_outputs: batch[1], keep_prob: 0.5}, session=sess)
