@@ -103,5 +103,4 @@ for i in range(5000):
 time_end = time.time()
 test = data.test_set(1000)
 train_accuracy = accuracy.eval(feed_dict={img_inputs: test[0], expect_outputs: test[1], keep_prob: 1.0}, session=sess)
-
 print("final accuracy: %g%%, total time: %gs" % (final_accuracy*100, (time_end-time_start)))
