@@ -26,18 +26,12 @@ biases_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
 res_conv2 = tf.nn.relu(tf.nn.conv2d(res_pool1, weights_conv2, strides=[1, 1, 1, 1], padding='SAME') + biases_conv2)
 res_pool2 = tf.nn.max_pool(res_conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-weights_conv3 = tf.Variable(tf.truncated_normal([5, 5, 64, 128], stddev=0.1))
-biaese_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
-
-res_conv3 = tf.nn.relu(tf.nn.conv2d(res_pool2, weights_conv3, strides=[1, 1, 1, 1], padding='SAME') + biaese_conv3)
-res_pool3 = tf.nn.max_pool(res_conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-weights_fc1 = tf.Variable(tf.truncated_normal([4*4*128, 1024], stddev=0.1))
+weights_fc1 = tf.Variable(tf.truncated_normal([7*7*64, 1024], stddev=0.1))
 biases_fc1 = tf.Variable(tf.constant(0.1, shape=[1024]))
 
-res_pool3_reshape = tf.reshape(res_pool3, [-1, 4*4*128])
+res_pool2_reshape = tf.reshape(res_pool2, [-1, 7*7*64])
 
-res_fc1 = tf.nn.relu(tf.matmul(res_pool3_reshape, weights_fc1) + biases_fc1)
+res_fc1 = tf.nn.relu(tf.matmul(res_pool2_reshape, weights_fc1) + biases_fc1)
 
 keep_prob = tf.placeholder("float")
 res_fc1_drop = tf.nn.dropout(res_fc1, keep_prob)

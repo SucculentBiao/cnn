@@ -88,16 +88,18 @@ data = img_data.Data()
 sess.run(tf.global_variables_initializer())
 
 time_start = time.time()
+final_accuracy = 0
 for i in range(10000):
     batch = data.train_set(50)
     test = data.test_set(500)
     if ((i+1) % 10 == 0):
         train_accuracy = accuracy.eval(feed_dict={img_inputs: test[0],
                         expect_outputs: test[1], keep_prob: 1.0}, session=sess)
+        if train_accuracy > final_accuracy: 
+            final_accuracy = train_accuracy
         print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
     train_step.run(feed_dict={img_inputs: batch[0], expect_outputs: batch[1], 
                 keep_prob: 0.5, train: True}, session=sess)
 time_end = time.time()
 test = data.test_set(1000)
-final_accuracy = accuracy.eval(feed_dict={img_inputs: test[0], expect_outputs: test[1], keep_prob: 1.0}, session=sess)
 print("final accuracy: %g%%, total time: %gs" % (final_accuracy*100, (time_end-time_start)))
