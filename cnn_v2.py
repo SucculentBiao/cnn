@@ -4,6 +4,7 @@
 import img_data
 import tensorflow as tf
 import  numpy as np
+import time
 from tensorflow.python.training.moving_averages import assign_moving_average
 
 def batch_norm(inputs, train, eps=1e-05, decay=0.9, name=None):
@@ -74,6 +75,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 data = img_data.Data()
 
 sess.run(tf.global_variables_initializer())
+time_start = time.time()
 for i in range(5000):
     batch = data.train_set(50)
     test = data.test_set(500)
@@ -82,7 +84,7 @@ for i in range(5000):
                         expect_outputs: test[1]}, session=sess)
         print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
     train_step.run(feed_dict={img_inputs: batch[0], expect_outputs: batch[1]}, session=sess)
-
+time_end = time.time()
 test = data.test_set(1000)
 final_accuracy = accuracy.eval(feed_dict={img_inputs: test[0], expect_outputs: test[1]}, session=sess)
-print("final accuracy: %g%%" % (final_accuracy*100))
+print("final accuracy: %g%%, total time: %gs" % (final_accuracy*100, (time_end-time_start)))

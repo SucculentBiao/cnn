@@ -1,8 +1,9 @@
-# inputs -> (conv -> relu -> pool)x2 -> fc(dropout) -> relu -> fc -> softmax
+# inputs -> (conv -> relu -> pool)x2 -> fc -> relu -> fc -> softmax
 # accuracy: 99.8%-100%
 
 import img_data
 import tensorflow as tf
+import time
 
 sess = tf.Session()
 
