@@ -1,3 +1,6 @@
+# inputs->conv->bn->relu->pool->fc(dropout)->relu->fc->softmax
+# accuracy: 
+
 import img_data
 import tensorflow as tf
 
@@ -14,23 +17,24 @@ biases_conv1 = tf.Variable(tf.constant(0.1, shape=[32]))
 img_reshape = tf.reshape(img_inputs, [-1, 28, 28, 1])
 
 res_conv1 = tf.nn.conv2d(img_reshape, weights_conv1, strides=[1, 1, 1, 1], padding='SAME') + biases_conv1
-mean_conv1, var_conv1 = tf.nn.moments(res_conv1, [0, 1, 2])
-res_bn1 = tf.nn.batch_normalization(res_conv1, mean_conv1, var_conv1, )
+'''
+para_shape = (res_conv1.get_shape().as_list())[-1:]
+axis = list(range(len(res_conv1.shape) - 1))
+mean, var = tf.nn.moments(res_conv1, axis)
+beta = tf.get_variable('beta', para_shape, initializer=tf.zeros_initializer)
+gamma = tf.get_variable('gamma', para_shape, initializer=tf.ones_initializer)
+res_batch = tf.nn.batch_normalization(res_conv1, mean, var, beta, gamma, 1e-5)
+'''
+res_batch = tf.contrib.layers.batch_norm(res_conv1, decay=0.9)
+res_relu1 = tf.nn.relu(res_batch)
+res_pool1 = tf.nn.max_pool(res_relu1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-res_pool1 = tf.nn.max_pool(res_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-weights_conv2 = tf.Variable(tf.truncated_normal([5, 5, 32, 64], stddev=0.1))
-biases_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
-
-res_conv2 = tf.nn.relu(tf.nn.conv2d(res_pool1, weights_conv2, strides=[1, 1, 1, 1], padding='SAME') + biases_conv2)
-res_pool2 = tf.nn.max_pool(res_conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-weights_fc1 = tf.Variable(tf.truncated_normal([7*7*64, 1024], stddev=0.1))
+weights_fc1 = tf.Variable(tf.truncated_normal([14*14*32, 1024], stddev=0.1))
 biases_fc1 = tf.Variable(tf.constant(0.1, shape=[1024]))
 
-res_pool2_reshape = tf.reshape(res_pool2, [-1, 7*7*64])
+res_pool1_reshape = tf.reshape(res_pool1, [-1, 14*14*32])
 
-res_fc1 = tf.nn.relu(tf.matmul(res_pool2_reshape, weights_fc1) + biases_fc1)
+res_fc1 = tf.nn.relu(tf.matmul(res_pool1_reshape, weights_fc1) + biases_fc1)
 
 keep_prob = tf.placeholder("float")
 res_fc1_drop = tf.nn.dropout(res_fc1, keep_prob)
@@ -51,11 +55,8 @@ sess.run(tf.global_variables_initializer())
 for i in range(2000):
     batch = data.train_set(50)
     test = data.train_set(500)
-    if ((i+1) % 100 == 0):
-        train_accuracy = accuracy.eval(feed_dict={
-                img_inputs: test[0], expect_outputs: test[1], keep_prob: 1.0}, session=sess)
+    if ((i+1) % 10 == 0):
+        train_accuracy = accuracy.eval(feed_dict={img_inputs: test[0],
+                        expect_outputs: test[1], keep_prob: 1.0}, session=sess)
         print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
     train_step.run(feed_dict={img_inputs: batch[0], expect_outputs: batch[1], keep_prob: 0.5}, session=sess)
-
-# print("test accuracy %g"%accuracy.eval(feed_dict={
-#     x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
