@@ -58,8 +58,8 @@ sess.run(tf.global_variables_initializer())
 time_start = time.time()
 for i in range(5000):
     batch = data.train_set(50)
-    test = data.test_set(500)
     if ((i+1) % 10 == 0):
+        test = data.test_set(500)
         train_accuracy = accuracy.eval(feed_dict={img_inputs: test[0],
                         expect_outputs: test[1], keep_prob: 1.0}, session=sess)
         print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
