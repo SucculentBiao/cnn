@@ -95,9 +95,9 @@ for i in range(5000):
     if ((i+1) % 10 == 0):
         train_accuracy = accuracy.eval(feed_dict={img_inputs: test[0],
                         expect_outputs: test[1], keep_prob: 1.0}, session=sess)
+        print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
         if train_accuracy > final_accuracy: 
             final_accuracy = train_accuracy
-        print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
     train_step.run(feed_dict={img_inputs: batch[0], expect_outputs: batch[1], 
                 keep_prob: 0.5, train: True}, session=sess)
 time_end = time.time()
