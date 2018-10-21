@@ -1,7 +1,15 @@
 import numpy as np
-import random
+from PIL import Image
 
 def parse(file_name):
+    img = Image.open(file_name)
+    pixels = list(img.getdata())
+    for i in range(len(pixels)):
+        pixels[i] /= 255
+    img.close()
+    return pixels
+
+def old_parse(file_name):
     img = open(file_name, 'rb')
     img.read(62)
     int_pixels = []

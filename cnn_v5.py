@@ -1,5 +1,5 @@
 # inputs -> (conv -> relu -> pool)x2 -> fc -> relu -> fc -> softmax
-# accuracy: 99.8%-100%
+# train time: 5000, accuracy: 96%， run time: 806s
 
 import img_data
 import tensorflow as tf
@@ -48,7 +48,7 @@ data = img_data.Data()
 sess.run(tf.global_variables_initializer())
 
 time_start = time.time()
-for i in range(20000):
+for i in range(5000):
     batch = data.train_set(50)
     test = data.test_set(500)
     if ((i+1) % 10 == 0):

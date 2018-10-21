@@ -1,5 +1,5 @@
 # inputs -> conv -> relu -> pool -> fc(dropout) -> relu -> fc -> softmax
-# train time: 5000, accuracy: 91.8%， run time: 495s
+# train time: 5000, accuracy: 94.6%， run time: 569s
 
 import img_data
 import tensorflow as tf

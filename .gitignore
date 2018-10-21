@@ -6,3 +6,4 @@ TRAIN/
 __pycache__/
 cnntest/
 .DS_Store
+logs/

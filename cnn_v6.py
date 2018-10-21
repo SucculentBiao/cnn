@@ -1,5 +1,5 @@
-# inputs -> (conv -> relu -> pool)x2 -> fc -> relu -> fc -> softmax
-# accuracy: 99.8%-100%
+# inputs -> (conv -> bn -> leaky_relu -> pool)x2 -> fc(dropout) -> relu -> fc -> softmax
+# train time: 5000, accuracy: 95%， run time: 987s
 
 import img_data
 import tensorflow as tf
@@ -91,8 +91,9 @@ time_start = time.time()
 final_accuracy = 0
 for i in range(5000):
     batch = data.train_set(50)
-    test = data.test_set(500)
+    
     if ((i+1) % 10 == 0):
+        test = data.test_set(500)
         train_accuracy = accuracy.eval(feed_dict={img_inputs: test[0],
                         expect_outputs: test[1], keep_prob: 1.0}, session=sess)
         print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))

@@ -1,5 +1,5 @@
 # inputs -> conv -> leaky_relu -> pool -> fc -> leaky_relu -> fc -> softmax
-# train time: 5000, accuracy: 89.8%， run time: 560s
+# train time: 5000, accuracy: 93%， run time: 575s
 
 import img_data
 import tensorflow as tf

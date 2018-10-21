@@ -1,5 +1,5 @@
-# inputs -> conv -> relu -> pool -> fc(dropout) -> relu -> fc -> softmax
-# train time: 5000, accuracy: 91.8%， run time: 495s
+# inputs -> conv -> leaky_relu -> pool -> fc(dropout) -> leaky_relu -> fc -> softmax
+# train time: 5000, best_accuracy: 99.8%, final_accuracy: 6%,  run time: 695s
 
 import img_data
 import tensorflow as tf
@@ -10,30 +10,38 @@ sess = tf.Session()
 img_inputs = tf.placeholder("float", shape=[None, 784])
 expect_outputs = tf.placeholder("float", shape=[None, 14])
 
-sess.run(tf.global_variables_initializer())
+keep_prob = tf.placeholder("float")
 
-weights_conv1 = tf.Variable(tf.truncated_normal([5, 5, 1, 32], stddev=0.1))
+weights_conv1 = tf.Variable(tf.truncated_normal([3, 3, 1, 32], stddev=0.1))
 biases_conv1 = tf.Variable(tf.constant(0.1, shape=[32]))
 
 img_reshape = tf.reshape(img_inputs, [-1, 28, 28, 1])
 
-res_conv1 = tf.nn.relu(tf.nn.conv2d(img_reshape, weights_conv1, strides=[1, 1, 1, 1], padding='SAME') + biases_conv1)
+res_conv1 = tf.nn.leaky_relu(tf.nn.conv2d(img_reshape, weights_conv1, strides=[1, 1, 1, 1], padding='SAME') + biases_conv1)
 res_pool1 = tf.nn.max_pool(res_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+# res_pool1_drop = tf.nn.dropout(res_pool1, keep_prob)
 
-weights_conv2 = tf.Variable(tf.truncated_normal([5, 5, 32, 64], stddev=0.1))
+weights_conv2 = tf.Variable(tf.truncated_normal([3, 3, 32, 64], stddev=0.1))
 biases_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
 
-res_conv2 = tf.nn.relu(tf.nn.conv2d(res_pool1, weights_conv2, strides=[1, 1, 1, 1], padding='SAME') + biases_conv2)
+res_conv2 = tf.nn.leaky_relu(tf.nn.conv2d(res_pool1, weights_conv2, strides=[1, 1, 1, 1], padding='SAME') + biases_conv2)
 res_pool2 = tf.nn.max_pool(res_conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+# res_pool2_drop = tf.nn.dropout(res_pool2, keep_prob)
 
-weights_fc1 = tf.Variable(tf.truncated_normal([7*7*64, 1024], stddev=0.1))
+weights_conv3 = tf.Variable(tf.truncated_normal([3, 3, 64, 128], stddev=0.1))
+biases_conv3 = tf.Variable(tf.constant(0.1, shape=[128]))
+
+res_conv3 = tf.nn.leaky_relu(tf.nn.conv2d(res_pool2, weights_conv3, strides=[1, 1, 1, 1], padding='SAME'))
+res_pool3 = tf.nn.max_pool(res_conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+# res_pool3_drop = tf.nn.dropout(res_pool3, keep_prob)
+
+weights_fc1 = tf.Variable(tf.truncated_normal([4*4*128, 1024], stddev=0.1))
 biases_fc1 = tf.Variable(tf.constant(0.1, shape=[1024]))
 
-res_pool2_reshape = tf.reshape(res_pool2, [-1, 7*7*64])
+res_pool3_reshape = tf.reshape(res_pool3, [-1, 4*4*128])
 
-res_fc1 = tf.nn.relu(tf.matmul(res_pool2_reshape, weights_fc1) + biases_fc1)
+res_fc1 = tf.nn.leaky_relu(tf.matmul(res_pool3_reshape, weights_fc1) + biases_fc1)
 
-keep_prob = tf.placeholder("float")
 res_fc1_drop = tf.nn.dropout(res_fc1, keep_prob)
 
 weights_fc2 = tf.Variable(tf.truncated_normal([1024, 14], stddev=0.1))
@@ -42,7 +50,7 @@ biases_fc2 = tf.Variable(tf.constant(0.1, shape=[14]))
 outputs = tf.nn.softmax(tf.matmul(res_fc1_drop, weights_fc2) + biases_fc2)
 
 cross_entropy = -tf.reduce_sum(expect_outputs*tf.log(outputs))
-train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+train_step = tf.train.AdamOptimizer(1e-3).minimize(cross_entropy)
 correct_prediction = tf.equal(tf.argmax(outputs, 1), tf.argmax(expect_outputs, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
@@ -50,7 +58,7 @@ data = img_data.Data()
 
 sess.run(tf.global_variables_initializer())
 time_start = time.time()
-for i in range(5000):
+for i in range(2000):
     batch = data.train_set(50)
     if ((i+1) % 10 == 0):
         test = data.test_set(500)
