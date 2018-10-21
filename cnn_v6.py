@@ -89,7 +89,7 @@ sess.run(tf.global_variables_initializer())
 
 time_start = time.time()
 final_accuracy = 0
-for i in range(10000):
+for i in range(5000):
     batch = data.train_set(50)
     test = data.test_set(500)
     if ((i+1) % 10 == 0):
