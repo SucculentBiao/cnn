@@ -28,7 +28,7 @@ class Data:
     def train_set(self, data_num=10):
         inputs = []
         expects = []
-        for i in range(data_num):
+        for _ in range(data_num):
             rand = random.randint(0, len(self.train) - 1)
             tmp = self.train[rand]
             inputs.append(tmp[0])
@@ -39,7 +39,7 @@ class Data:
     def test_set(self, data_num=10):
         inputs = []
         expects = []
-        for i in range(data_num):
+        for _ in range(data_num):
             rand = random.randint(0, len(self.test) - 1)
             tmp = self.test[rand]
             inputs.append(tmp[0])

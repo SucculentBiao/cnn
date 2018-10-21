@@ -1,5 +1,5 @@
-# inputs -> conv -> relu -> pool -> fc(dropout) -> relu -> fc -> softmax
-# accuracy: 99.6%-99.8%
+# inputs -> conv -> relu -> pool -> fc -> relu -> fc -> softmax
+# train time: 2000, accuracy: 85.1%
 
 import img_data
 import tensorflow as tf
@@ -26,13 +26,10 @@ res_pool1_reshape = tf.reshape(res_pool1, [-1, 14*14*32])
 
 res_fc1 = tf.nn.relu(tf.matmul(res_pool1_reshape, weights_fc1) + biases_fc1)
 
-keep_prob = tf.placeholder("float")
-res_fc1_drop = tf.nn.dropout(res_fc1, keep_prob)
-
 weights_fc2 = tf.Variable(tf.truncated_normal([1024, 14], stddev=0.1))
 biases_fc2 = tf.Variable(tf.constant(0.1, shape=[14]))
 
-outputs = tf.nn.softmax(tf.matmul(res_fc1_drop, weights_fc2) + biases_fc2)
+outputs = tf.nn.softmax(tf.matmul(res_fc1, weights_fc2) + biases_fc2)
 
 cross_entropy = -tf.reduce_sum(expect_outputs*tf.log(outputs))
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
@@ -42,11 +39,15 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 data = img_data.Data()
 
 sess.run(tf.global_variables_initializer())
-for i in range(2000):
+for i in range(5000):
     batch = data.train_set(50)
-    test = data.train_set(500)
+    test = data.test_set(500)
     if ((i+1) % 10 == 0):
         train_accuracy = accuracy.eval(feed_dict={img_inputs: test[0],
-                        expect_outputs: test[1], keep_prob: 1.0}, session=sess)
+                        expect_outputs: test[1]}, session=sess)
         print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
-    train_step.run(feed_dict={img_inputs: batch[0], expect_outputs: batch[1], keep_prob: 0.5}, session=sess)
+    train_step.run(feed_dict={img_inputs: batch[0], expect_outputs: batch[1]}, session=sess)
+
+test = data.test_set(1000)
+final_accuracy = accuracy.eval(feed_dict={img_inputs: test[0], expect_outputs: test[1]}, session=sess)
+print("final accuracy: %f%%" % (final_accuracy*100))

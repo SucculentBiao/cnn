@@ -50,11 +50,13 @@ data = img_data.Data()
 sess.run(tf.global_variables_initializer())
 for i in range(2000):
     batch = data.train_set(50)
-    
+    if ((i+1) % 10 == 0):
+        train_accuracy = accuracy.eval(feed_dict={img_inputs: batch[0],
+                        expect_outputs: batch[1], keep_prob: 1.0}, session=sess)
+        print("step %d, training accuracy %f%%" % (i+1, train_accuracy*100))
     train_step.run(feed_dict={img_inputs: batch[0], expect_outputs: batch[1], keep_prob: 0.5}, session=sess)
 
-test = data.train_set(500)
-#if ((i+1) % 100 == 0):
-train_accuracy = accuracy.eval(feed_dict={
-                img_inputs: test[0], expect_outputs: test[1], keep_prob: 1.0}, session=sess)
-print("step %d, training accuracy %g%%" % (i+1, train_accuracy*100))
+test = data.test_set(500)
+final_accuracy = accuracy.eval(feed_dict={img_inputs: test[0],
+                        expect_outputs: test[1], keep_prob: 1.0}, session=sess)
+print("final accuracy: %f%%" % final_accuracy*100)
