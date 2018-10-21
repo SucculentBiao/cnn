@@ -48,7 +48,7 @@ data = img_data.Data()
 sess.run(tf.global_variables_initializer())
 
 time_start = time.time()
-for i in range(5000):
+for i in range(20000):
     batch = data.train_set(50)
     test = data.test_set(500)
     if ((i+1) % 10 == 0):
