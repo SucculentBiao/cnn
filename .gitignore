@@ -3,3 +3,6 @@ tensor_test/
 venv/
 MNIST_data/
 TRAIN/
+__pycache__/
+cnntest/
+.DS_Store
